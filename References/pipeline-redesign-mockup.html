@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pipeline Redesign — Mockup</title>
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #0a0d12;
+    --surface: #161b22;
+    --surface-2: #1c222b;
+    --surface-3: #232a35;
+    --line: #2a313c;
+    --line-strong: #3a4350;
+    --ink: #e6e8eb;
+    --ink-bright: #ffffff;
+    --muted: #9ba3af;
+    --muted-dim: #6b7280;
+    --primary: #7c93b8;
+    --primary-strong: #94a8c8;
+    --primary-soft: rgba(124, 147, 184, 0.14);
+    --primary-ink: #0a0d12;
+    --accent: #5db4a8;
+    --accent-soft: rgba(93, 180, 168, 0.14);
+    --good: #6fbf8a;
+    --warn: #d9b86a;
+    --danger: #d97676;
+    --good-soft: rgba(111, 191, 138, 0.12);
+    --warning-soft: rgba(217, 184, 106, 0.14);
+    --danger-soft: rgba(217, 118, 118, 0.14);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.25);
+    --radius: 10px;
+    --radius-sm: 6px;
+    --motion: 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, p { margin: 0; }
+  h2 { font-size: 16px; font-weight: 600; color: var(--ink-bright); }
+  h3 { font-size: 13px; font-weight: 600; color: var(--ink); }
+  button { font: inherit; cursor: pointer; }
+  .muted { color: var(--muted); }
+  .small { font-size: 12px; }
+
+  /* ---- Mockup banner ---- */
+  .mock-banner {
+    background: var(--warning-soft);
+    border-bottom: 1px solid var(--line);
+    color: var(--warn);
+    font-size: 12px;
+    padding: 6px 20px;
+    letter-spacing: 0.02em;
+  }
+
+  /* ---- App shell ---- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 12px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { font-weight: 700; color: var(--ink-bright); letter-spacing: 0.01em; }
+  .brand span { color: var(--accent); }
+  .topnav { display: flex; gap: 4px; }
+  .topnav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+  }
+  .topnav a:hover { color: var(--ink); background: var(--surface-2); }
+  .topnav a.active { color: var(--ink-bright); background: var(--primary-soft); }
+  .topbar .spacer { flex: 1; }
+  .add-btn {
+    background: var(--primary);
+    color: var(--primary-ink);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .layout { display: grid; grid-template-columns: 1fr 380px; gap: 16px; padding: 16px 20px; align-items: start; }
+  @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--shadow);
+  }
+
+  /* ---- Pipeline header: mode toggle ---- */
+  .pipe-head { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+  .mode-toggle { display: inline-flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 3px; }
+  .mode-toggle button {
+    border: none; background: transparent; color: var(--muted);
+    padding: 7px 16px; border-radius: 6px; font-size: 13px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .mode-toggle button.active { background: var(--primary); color: var(--primary-ink); }
+  .mode-toggle .count {
+    font-size: 11px; background: rgba(0,0,0,0.25); padding: 1px 7px; border-radius: 999px;
+  }
+  .mode-toggle button:not(.active) .count { background: var(--surface-3); color: var(--muted); }
+
+  .pipe-head .spacer { flex: 1; }
+  .control { display: inline-flex; align-items: center; gap: 6px; }
+  .control input, .control select {
+    background: var(--surface-2); border: 1px solid var(--line); color: var(--ink);
+    border-radius: var(--radius-sm); height: 32px; padding: 0 10px; font-size: 12px;
+  }
+  .control label { font-size: 11px; color: var(--muted-dim); text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .keyhint { font-size: 11px; color: var(--muted-dim); margin: -4px 0 12px; }
+  kbd {
+    background: var(--surface-3); border: 1px solid var(--line-strong); border-bottom-width: 2px;
+    border-radius: 4px; padding: 1px 6px; font-size: 11px; font-family: inherit; color: var(--ink);
+  }
+
+  /* ---- Rows (Decide) ---- */
+  .rows { display: flex; flex-direction: column; }
+  .row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 12px; border-top: 1px solid var(--line);
+    transition: background var(--motion);
+  }
+  .row:hover { background: var(--surface-2); }
+  .row.sel { background: var(--primary-soft); box-shadow: inset 2px 0 0 var(--primary); }
+  .row .chk { width: 15px; height: 15px; accent-color: var(--primary); }
+  .row-main { flex: 1; min-width: 0; }
+  .row-title { font-size: 14px; color: var(--ink-bright); font-weight: 500; }
+  .row-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .row-actions { display: flex; gap: 6px; }
+
+  /* Pills */
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); white-space: nowrap;
+  }
+  .score {
+    font-variant-numeric: tabular-nums; min-width: 44px; justify-content: center;
+  }
+  .score.good { color: var(--good); border-color: rgba(111,191,138,0.4); background: var(--good-soft); }
+  .score.mid  { color: var(--warn); border-color: rgba(217,184,106,0.4); background: var(--warning-soft); }
+  .score.low  { color: var(--danger); border-color: rgba(217,118,118,0.4); background: var(--danger-soft); }
+  .pill.live { color: var(--good); border-color: rgba(111,191,138,0.35); }
+  .pill.dead { color: var(--danger); border-color: rgba(217,118,118,0.35); }
+  .pill.warn { color: var(--warn); border-color: rgba(217,184,106,0.35); background: var(--warning-soft); }
+  .pill.stage { background: var(--surface-3); color: var(--ink); }
+
+  .btn {
+    border: 1px solid var(--line-strong); background: var(--surface-2); color: var(--ink);
+    border-radius: var(--radius-sm); padding: 6px 12px; font-size: 12px; font-weight: 600;
+    transition: background var(--motion), border-color var(--motion);
+  }
+  .btn:hover { background: var(--surface-3); }
+  .btn.primary { background: var(--primary); color: var(--primary-ink); border-color: var(--primary); }
+  .btn.primary:hover { background: var(--primary-strong); }
+  .btn.ghost { background: transparent; }
+  .btn.danger:hover { color: var(--danger); border-color: rgba(217,118,118,0.5); }
+  .btn.sm { padding: 4px 9px; font-size: 11px; min-height: 0; }
+
+  /* ---- Funnel strip (Track) ---- */
+  .funnel { display: flex; align-items: stretch; gap: 0; margin-bottom: 14px; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .funnel .seg { flex: 1; padding: 10px 12px; background: var(--surface-2); border-right: 1px solid var(--line); position: relative; }
+  .funnel .seg:last-child { border-right: none; }
+  .funnel .seg .n { font-size: 20px; font-weight: 700; color: var(--ink-bright); font-variant-numeric: tabular-nums; }
+  .funnel .seg .l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .funnel .seg .arrow { position: absolute; right: -7px; top: 50%; transform: translateY(-50%); color: var(--muted-dim); z-index: 2; font-size: 12px; }
+
+  .track-tools { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .track-tools .spacer { flex: 1; }
+  .seg-toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+  .seg-toggle button { border: none; background: var(--surface-2); color: var(--muted); padding: 6px 12px; font-size: 12px; font-weight: 600; }
+  .seg-toggle button.active { background: var(--primary-soft); color: var(--ink-bright); }
+
+  /* Stage sections */
+  .stage-sec { border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; }
+  .stage-head {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+    background: var(--surface-2); border: none; color: var(--ink); padding: 10px 14px;
+  }
+  .stage-head:hover { background: var(--surface-3); }
+  .stage-head .caret { transition: transform var(--motion); color: var(--muted); font-size: 11px; }
+  .stage-sec.collapsed .caret { transform: rotate(-90deg); }
+  .stage-head .name { font-weight: 600; font-size: 13px; color: var(--ink-bright); }
+  .stage-head .cnt { font-size: 11px; color: var(--muted); background: var(--surface-3); padding: 1px 8px; border-radius: 999px; }
+  .stage-head .hint { flex: 1; text-align: right; font-size: 11px; color: var(--muted-dim); }
+  .stage-body { display: flex; flex-direction: column; }
+  .stage-sec.collapsed .stage-body { display: none; }
+  .stage-body .row:first-child { border-top: none; }
+  .meta-applied { font-variant-numeric: tabular-nums; }
+
+  /* Table (density) */
+  table.dense { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.dense th {
+    text-align: left; color: var(--muted-dim); font-weight: 600; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.04em; padding: 8px 10px; border-bottom: 1px solid var(--line);
+  }
+  table.dense td { padding: 9px 10px; border-bottom: 1px solid var(--line); }
+  table.dense tr:hover td { background: var(--surface-2); }
+  table.dense tr.sel td { background: var(--primary-soft); }
+  table.dense .t-co { color: var(--ink-bright); font-weight: 500; }
+  table.dense .num { font-variant-numeric: tabular-nums; }
+  .hidden { display: none !important; }
+
+  /* ---- Detail panel ---- */
+  .detail h2 { margin-bottom: 2px; }
+  .detail .role { font-size: 18px; font-weight: 600; color: var(--ink-bright); }
+  .detail .co { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .detail-meta { display: flex; gap: 7px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+  .tabs button { border: none; background: transparent; color: var(--muted); padding: 8px 12px; font-size: 12px; font-weight: 600; border-bottom: 2px solid transparent; }
+  .tabs button.active { color: var(--ink-bright); border-bottom-color: var(--primary); }
+  .timeline { list-style: none; padding: 0; margin: 0 0 16px; }
+  .timeline li { display: flex; gap: 10px; padding: 7px 0; font-size: 12.5px; color: var(--ink); }
+  .timeline .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 6px; flex: none; }
+  .timeline .when { color: var(--muted-dim); font-size: 11px; }
+  .field-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted-dim); margin-bottom: 4px; }
+  .detail textarea { width: 100%; min-height: 64px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--ink); padding: 8px 10px; font-size: 12.5px; resize: vertical; }
+  .verdict-bar { display: flex; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .verdict-bar .btn { flex: 1; }
+</style>
+</head>
+<body>
+  <div class="mock-banner">Static mockup — Pipeline redesign (Decide / Track). Interactions are illustrative only; no data is saved.</div>
+
+  <div class="topbar">
+    <div class="brand">Local<span>Job</span>Tracker</div>
+    <nav class="topnav">
+      <a href="#">Today</a>
+      <a href="#" class="active">Pipeline</a>
+      <a href="#">Insights</a>
+      <a href="#">Settings</a>
+    </nav>
+    <div class="spacer"></div>
+    <button class="add-btn">+ Add job</button>
+  </div>
+
+  <div class="layout">
+    <!-- LEFT: pipeline -->
+    <section class="panel">
+      <div class="pipe-head">
+        <div class="mode-toggle">
+          <button id="m-decide" class="active" onclick="setMode('decide')">Decide <span class="count" id="c-decide">12</span></button>
+          <button id="m-track" onclick="setMode('track')">Track <span class="count" id="c-track">9</span></button>
+        </div>
+        <div class="spacer"></div>
+        <div class="control"><label>Search</label><input type="search" placeholder="Company, title…" style="width:150px" /></div>
+        <div class="control" id="sort-ctl"><label>Sort</label>
+          <select><option>Score (high → low)</option><option>Date added</option><option>Company</option></select>
+        </div>
+      </div>
+
+      <!-- ===== DECIDE MODE ===== -->
+      <div id="view-decide">
+        <p class="keyhint">
+          A shrinking queue of un-decided reqs from your last upload &middot;
+          <kbd>j</kbd>/<kbd>k</kbd> move &middot; <kbd>s</kbd> shortlist &middot; <kbd>x</kbd> skip &middot; <kbd>a</kbd> apply &middot; auto-advances
+        </p>
+        <div class="rows" id="decide-rows"></div>
+      </div>
+
+      <!-- ===== TRACK MODE ===== -->
+      <div id="view-track" class="hidden">
+        <div class="funnel" id="funnel"></div>
+        <div class="track-tools">
+          <span class="small muted">Everything you've committed to — sorted so the oldest waits float up.</span>
+          <div class="spacer"></div>
+          <div class="seg-toggle">
+            <button id="lay-sections" class="active" onclick="setLayout('sections')">Sections</button>
+            <button id="lay-table" onclick="setLayout('table')">Table</button>
+          </div>
+        </div>
+        <div id="track-sections"></div>
+        <div id="track-table" class="hidden"></div>
+      </div>
+    </section>
+
+    <!-- RIGHT: detail -->
+    <aside class="panel detail" id="detail"></aside>
+  </div>
+
+<script>
+  // ---------- mock data ----------
+  const JOBS = [
+    // Decide queue (undecided opportunities)
+    { id:'j1', co:'Stripe', title:'Staff Product Manager', loc:'Remote', pay:'$240k', score:92, posting:'live', stage:'decide' },
+    { id:'j2', co:'Reddit', title:'Group Product Manager', loc:'New York, NY', pay:'$210k', score:78, posting:'live', stage:'decide' },
+    { id:'j3', co:'Notion', title:'Senior Product Manager', loc:'San Francisco, CA', pay:'$190k', score:61, posting:'live', stage:'decide' },
+    { id:'j4', co:'Figma', title:'Product Manager, Growth', loc:'Remote', pay:'$185k', score:58, posting:'live', stage:'decide' },
+    { id:'j5', co:'Acme Corp', title:'Product Manager', loc:'Austin, TX', pay:'$150k', score:34, posting:'live', stage:'decide' },
+
+    // Track (committed)
+    { id:'t1', co:'Stripe', title:'Staff PM, Payments', loc:'Remote', pay:'$245k', score:88, posting:'live', stage:'shortlisted', next:'Tailor resume to fintech' },
+    { id:'t2', co:'Linear', title:'Product Manager', loc:'Remote', pay:'$200k', score:81, posting:'live', stage:'shortlisted', next:'Find a referral' },
+    { id:'t3', co:'Reddit', title:'Group PM, Ads', loc:'New York, NY', pay:'$215k', score:78, posting:'live', stage:'applied', applied:'2026-05-21', days:12, followup:true },
+    { id:'t4', co:'Vercel', title:'Senior PM', loc:'Remote', pay:'$205k', score:72, posting:'live', stage:'applied', applied:'2026-05-25', days:8 },
+    { id:'t5', co:'Notion', title:'Senior PM, AI', loc:'San Francisco, CA', pay:'$195k', score:65, posting:'live', stage:'applied', applied:'2026-05-29', days:4 },
+    { id:'t6', co:'Airtable', title:'PM, Platform', loc:'Remote', pay:'$190k', score:69, posting:'dead', stage:'applied', applied:'2026-05-18', days:15, followup:true },
+    { id:'t7', co:'Webflow', title:'Lead PM', loc:'Remote', pay:'$210k', score:76, posting:'live', stage:'screening', applied:'2026-05-10', days:23, next:'Recruiter screen Tue 3pm' },
+    { id:'t8', co:'Datadog', title:'Senior PM', loc:'New York, NY', pay:'$220k', score:84, posting:'live', stage:'interviewing', applied:'2026-04-28', days:35, next:'Onsite loop Thu' },
+    { id:'t9', co:'Snowflake', title:'Principal PM', loc:'Remote', pay:'$260k', score:90, posting:'live', stage:'offer', applied:'2026-04-15', days:48, next:'Negotiate base' },
+  ];
+
+  const STAGES = [
+    { key:'shortlisted', label:'Shortlisted', hint:'decided to pursue, not applied' },
+    { key:'applied', label:'Applied · awaiting', hint:'sorted by oldest first' },
+    { key:'screening', label:'Screening', hint:'' },
+    { key:'interviewing', label:'Interviewing', hint:'' },
+    { key:'offer', label:'Offer', hint:'' },
+  ];
+  const FUNNEL = ['shortlisted','applied','screening','interviewing','offer'];
+  const STAGE_LABEL = { decide:'To review', shortlisted:'Shortlisted', applied:'Applied', screening:'Screening', interviewing:'Interviewing', offer:'Offer' };
+
+  let mode = 'decide';
+  let layout = 'sections';
+  let selectedId = 't3';
+  const collapsed = { offer:false, interviewing:false };
+
+  function scoreClass(s){ return s >= 70 ? 'good' : s >= 50 ? 'mid' : 'low'; }
+  function verdictLabel(s){ return s >= 70 ? 'Apply now' : s >= 50 ? 'Pursue' : 'Skip'; }
+
+  // ---------- DECIDE ----------
+  function renderDecide(){
+    const rows = JOBS.filter(j => j.stage === 'decide');
+    document.getElementById('decide-rows').innerHTML = rows.map(j => `
+      <div class="row ${j.id===selectedId?'sel':''}" onclick="select('${j.id}')">
+        <input type="checkbox" class="chk" onclick="event.stopPropagation()" />
+        <span class="pill score ${scoreClass(j.score)}">${j.score}</span>
+        <div class="row-main">
+          <div class="row-title">${j.co} — ${j.title}</div>
+          <div class="row-sub">${j.loc} · ${j.pay} · <span style="color:var(--muted-dim)">${verdictLabel(j.score)}</span></div>
+        </div>
+        <div class="row-actions" onclick="event.stopPropagation()">
+          <button class="btn sm" title="Shortlist (s)" onclick="decide('${j.id}','shortlist')">Shortlist</button>
+          <button class="btn sm ghost danger" title="Skip (x)" onclick="decide('${j.id}','skip')">Skip</button>
+          <button class="btn sm primary" title="Apply (a)" onclick="decide('${j.id}','apply')">Apply</button>
+        </div>
+      </div>`).join('');
+    if(!rows.length){
+      document.getElementById('decide-rows').innerHTML =
+        `<div class="row" style="border-top:none;color:var(--muted)">Queue empty — every uploaded req has been decided. 🎉</div>`;
+    }
+  }
+
+  function decide(id, action){
+    const j = JOBS.find(x=>x.id===id);
+    if(action==='skip'){ j.stage='skipped'; }
+    else if(action==='shortlist'){ j.stage='shortlisted'; j.next='Find a referral'; }
+    else if(action==='apply'){
+      const today = new Date().toISOString().slice(0,10);
+      j.stage='applied'; j.applied=today; j.days=0;
+    }
+    renderAll();
+  }
+
+  // ---------- TRACK ----------
+  function trackJobs(){ return JOBS.filter(j => FUNNEL.includes(j.stage)); }
+
+  function renderFunnel(){
+    const counts = {}; FUNNEL.forEach(s => counts[s]=0);
+    trackJobs().forEach(j => counts[j.stage]++);
+    document.getElementById('funnel').innerHTML = FUNNEL.map((s,i)=>`
+      <div class="seg">
+        <div class="n">${counts[s]}</div>
+        <div class="l">${STAGES.find(x=>x.key===s).label.replace(' · awaiting','')}</div>
+        ${i<FUNNEL.length-1?'<span class="arrow">▸</span>':''}
+      </div>`).join('');
+  }
+
+  function rowHtml(j){
+    const applied = j.applied ? `<span class="meta-applied small muted">Applied ${j.days}d ago</span>` : `<span class="small muted-dim">not applied</span>`;
+    const fu = j.followup ? `<span class="pill warn">⚠ follow up</span>` : '';
+    const next = j.next ? `<span class="small muted">next: ${j.next}</span>` : '';
+    return `
+      <div class="row ${j.id===selectedId?'sel':''}" onclick="select('${j.id}')">
+        <span class="pill score ${scoreClass(j.score)}">${j.score}</span>
+        <div class="row-main">
+          <div class="row-title">${j.co} — ${j.title}</div>
+          <div class="row-sub">${j.loc} · ${j.pay} ${next?'· '+next:''}</div>
+        </div>
+        ${j.posting==='dead'?'<span class="pill dead">Closed posting</span>':''}
+        ${fu}
+        ${applied}
+      </div>`;
+  }
+
+  function renderSections(){
+    const jobs = trackJobs();
+    document.getElementById('track-sections').innerHTML = STAGES.map(st=>{
+      let list = jobs.filter(j=>j.stage===st.key);
+      if(st.key==='applied') list = list.sort((a,b)=>b.days-a.days);
+      if(!list.length) return '';
+      const isCol = !!collapsed[st.key];
+      return `
+        <div class="stage-sec ${isCol?'collapsed':''}">
+          <button class="stage-head" onclick="toggleStage('${st.key}')">
+            <span class="caret">▾</span>
+            <span class="name">${st.label}</span>
+            <span class="cnt">${list.length}</span>
+            <span class="hint">${st.hint||''}</span>
+          </button>
+          <div class="stage-body">${list.map(rowHtml).join('')}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderTable(){
+    const jobs = trackJobs().slice().sort((a,b)=> FUNNEL.indexOf(a.stage)-FUNNEL.indexOf(b.stage) || (b.days||0)-(a.days||0));
+    document.getElementById('track-table').innerHTML = `
+      <table class="dense">
+        <thead><tr>
+          <th>Company</th><th>Title</th><th>Score</th><th>Stage</th>
+          <th>Applied</th><th>Days</th><th>Next action</th><th>Posting</th>
+        </tr></thead>
+        <tbody>
+          ${jobs.map(j=>`
+            <tr class="${j.id===selectedId?'sel':''}" onclick="select('${j.id}')">
+              <td class="t-co">${j.co}</td>
+              <td>${j.title}</td>
+              <td><span class="pill score ${scoreClass(j.score)}">${j.score}</span></td>
+              <td><span class="pill stage">${STAGE_LABEL[j.stage]}</span></td>
+              <td class="num muted">${j.applied||'—'}</td>
+              <td class="num ${j.followup?'':'muted'}" style="${j.followup?'color:var(--warn)':''}">${j.applied?j.days:'—'}</td>
+              <td class="muted">${j.next||'—'}</td>
+              <td>${j.posting==='dead'?'<span class="pill dead">Closed</span>':'<span class="pill live">Live</span>'}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function toggleStage(k){ collapsed[k] = !collapsed[k]; renderSections(); }
+
+  // ---------- DETAIL ----------
+  function renderDetail(){
+    const j = JOBS.find(x=>x.id===selectedId) || trackJobs()[0];
+    const stageName = STAGE_LABEL[j.stage] || 'To review';
+    const tl = [];
+    tl.push({when:'added', txt:'Added from Markdown import'});
+    if(j.applied){ tl.push({when:j.applied, txt:'Application submitted'}); }
+    if(j.stage==='screening'||j.stage==='interviewing'||j.stage==='offer'){ tl.push({when:'recent', txt:'Recruiter screen scheduled'}); }
+    if(j.stage==='interviewing'||j.stage==='offer'){ tl.push({when:'recent', txt:'Onsite interview loop'}); }
+    if(j.stage==='offer'){ tl.push({when:'today', txt:'Offer received'}); }
+
+    document.getElementById('detail').innerHTML = `
+      <div class="role">${j.title}</div>
+      <div class="co">${j.co} · ${j.loc}</div>
+      <div class="detail-meta">
+        <span class="pill score ${scoreClass(j.score)}">${j.score} / 100</span>
+        <span class="pill stage">${stageName}</span>
+        ${j.posting==='dead'?'<span class="pill dead">Posting closed</span>':'<span class="pill live">Live</span>'}
+        ${j.applied?`<span class="pill">Applied ${j.applied}</span>`:''}
+      </div>
+      <div class="tabs">
+        <button class="active">Triage</button><button>Notes</button>
+        <button>Contacts</button><button>Timeline</button><button>AI assist</button>
+      </div>
+      <div class="field-label">Application timeline</div>
+      <ul class="timeline">
+        ${tl.map(e=>`<li><span class="dot"></span><div><div>${e.txt}</div><div class="when">${e.when}</div></div></li>`).join('')}
+      </ul>
+      <div class="field-label">Your notes</div>
+      <textarea placeholder="Angle, risks, who to reach out to…">${j.next?('Next: '+j.next):''}</textarea>
+      <div class="verdict-bar">
+        ${j.stage==='decide'
+          ? `<button class="btn">Shortlist</button><button class="btn ghost danger">Skip</button><button class="btn primary">Apply</button>`
+          : `<button class="btn">Log follow-up</button><button class="btn">Advance stage</button><button class="btn primary">Open posting</button>`}
+      </div>`;
+  }
+
+  // ---------- shell ----------
+  function setMode(m){
+    mode = m;
+    document.getElementById('m-decide').classList.toggle('active', m==='decide');
+    document.getElementById('m-track').classList.toggle('active', m==='track');
+    document.getElementById('view-decide').classList.toggle('hidden', m!=='decide');
+    document.getElementById('view-track').classList.toggle('hidden', m!=='track');
+    document.getElementById('sort-ctl').classList.toggle('hidden', m==='track');
+    renderAll();
+  }
+  function setLayout(l){
+    layout = l;
+    document.getElementById('lay-sections').classList.toggle('active', l==='sections');
+    document.getElementById('lay-table').classList.toggle('active', l==='table');
+    document.getElementById('track-sections').classList.toggle('hidden', l!=='sections');
+    document.getElementById('track-table').classList.toggle('hidden', l!=='table');
+  }
+  function select(id){ selectedId = id; renderAll(); }
+
+  function renderAll(){
+    document.getElementById('c-decide').textContent = JOBS.filter(j=>j.stage==='decide').length;
+    document.getElementById('c-track').textContent = trackJobs().length;
+    renderDecide();
+    renderFunnel();
+    renderSections();
+    renderTable();
+    renderDetail();
+  }
+
+  renderAll();
+</script>
+</body>
+</html>

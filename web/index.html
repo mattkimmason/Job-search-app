@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JS // Job Search</title>
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem("jsing.theme");
+          var root = document.documentElement;
+          if (saved === "light") {
+            root.classList.remove("dark");
+          } else if (saved === "dark") {
+            root.classList.add("dark");
+          } else if (saved === "system") {
+            var prefersDark =
+              window.matchMedia("(prefers-color-scheme: dark)").matches;
+            root.classList.toggle("dark", prefersDark);
+          }
+          // If saved is missing/unknown, leave the default class="dark" alone.
+        } catch (_e) {
+          // ignore
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

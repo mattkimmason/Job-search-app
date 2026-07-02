@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JS // Job Search</title>
+    <link rel="stylesheet" href="/app/styles.css?v=20260601f">
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo-mark" aria-hidden="true">JS</div>
+          <div>
+            <p class="eyebrow">Job Search Copilot</p>
+            <h1 id="candidateName">Loading profile...</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button id="openHelpButton" class="ghost-button" type="button" aria-label="How to use this app">? Help</button>
+          <button id="openAddJobButton" class="primary-button" type="button">+ Add Job</button>
+        </div>
+      </header>
+
+      <main class="content">
+        <aside class="left">
+          <section class="panel">
+            <div class="tabs">
+              <button class="tab is-active" data-tab="today" type="button">
+                <span class="tab-label">Today</span>
+                <span class="tab-sub">What to do now</span>
+              </button>
+              <button class="tab" data-tab="pipeline" type="button">
+                <span class="tab-label">Pipeline</span>
+                <span class="tab-sub">Work the list</span>
+              </button>
+              <button class="tab" data-tab="insights" type="button">
+                <span class="tab-label">Insights</span>
+                <span class="tab-sub">Impact + trends</span>
+              </button>
+              <button class="tab" data-tab="settings" type="button">
+                <span class="tab-label">Settings</span>
+                <span class="tab-sub">Tools + LLM</span>
+              </button>
+            </div>
+
+            <div class="subsection">
+              <div class="panel-head"><h3>Guardrails</h3></div>
+              <div class="guardrails" aria-label="Guardrails">
+                <div><span>Market</span><strong id="marketMetric">-</strong></div>
+                <div><span>Salary Floor</span><strong id="salaryMetric">-</strong></div>
+                <div><span>Travel</span><strong id="travelMetric">-</strong></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel" data-section-when="pipeline">
+            <div class="panel-head"><h3>Saved Views</h3></div>
+            <div class="stack">
+              <div id="savedViewList"></div>
+              <form id="savedViewForm" class="inline-form">
+                <input id="savedViewName" type="text" placeholder="Name current filter">
+                <button type="submit">Save</button>
+              </form>
+            </div>
+          </section>
+        </aside>
+
+        <section class="center">
+
+          <!-- =========== TODAY =========== -->
+          <section class="panel section" data-section="today">
+            <div class="panel-head">
+              <h2>Today</h2>
+              <span class="pill subtle" id="todayDateLabel"></span>
+            </div>
+            <p class="muted">Your most important moves right now. Limited to keep focus.</p>
+
+            <div id="startHerePanel" class="start-here hidden">
+              <div class="start-here-head">
+                <h3>Start here</h3>
+                <button type="button" class="ghost-button small" id="dismissStartHereButton">Hide</button>
+              </div>
+              <p>This app helps you run a focused job search in five loops:</p>
+              <ol class="start-here-steps">
+                <li><strong>Add</strong> target roles (Manual, Markdown import, or Lookup).</li>
+                <li><strong>Score</strong> each role against your rubric in Pipeline.</li>
+                <li><strong>Apply</strong> and log the application date.</li>
+                <li><strong>Follow up</strong> when reminders surface here on Today.</li>
+                <li><strong>Track</strong> outcomes in Insights and adjust strategy.</li>
+              </ol>
+              <p class="muted small">Reopen this any time with the Help button up top.</p>
+            </div>
+
+            <div id="todayHub" class="today-grid"></div>
+          </section>
+
+          <!-- =========== PIPELINE =========== -->
+          <section class="panel section hidden" data-section="pipeline">
+            <div class="panel-head">
+              <h2>Pipeline</h2>
+              <span id="queueSummary" class="pill subtle">-</span>
+            </div>
+            <p class="muted small">Click a job to expand it. Use the activity panel below to update triage, notes, contacts, events, and AI drafts.</p>
+
+            <div class="toolbar">
+              <div class="toolbar-actions">
+                <label>
+                  <span>Search</span>
+                  <input id="searchInput" type="search" placeholder="Company, title, summary">
+                </label>
+                <label>
+                  <span>Discovery</span>
+                  <select id="discoveryFilter">
+                    <option value="">All</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Application</span>
+                  <select id="applicationFilter">
+                    <option value="">All</option>
+                  </select>
+                </label>
+                <label class="checkbox-label">
+                  <input id="showHiddenToggle" type="checkbox">
+                  <span>Show hidden</span>
+                </label>
+                <label class="checkbox-label">
+                  <input id="showClosedToggle" type="checkbox">
+                  <span>Show closed postings</span>
+                </label>
+              </div>
+            </div>
+
+            <div id="jobList" class="stack"></div>
+          </section>
+
+          <!-- =========== PIPELINE ACTIVITY (selected job detail) =========== -->
+          <section class="panel section hidden" data-section="pipeline">
+            <div class="panel-head">
+              <h2>Activity</h2>
+              <span id="selectedJobLabel" class="muted small">No job selected</span>
+            </div>
+
+            <div id="activityPanel">
+              <div class="activity-tabs" role="tablist">
+                <button class="activity-tab is-active" type="button" data-activity-tab="triage">Triage</button>
+                <button class="activity-tab" type="button" data-activity-tab="notes">Notes</button>
+                <button class="activity-tab" type="button" data-activity-tab="contacts">Contacts</button>
+                <button class="activity-tab" type="button" data-activity-tab="events">Events</button>
+                <button class="activity-tab" type="button" data-activity-tab="llm">AI assist</button>
+              </div>
+
+              <div class="activity-pane" data-activity-pane="triage">
+                <div class="triage-top">
+                  <label class="score-display">
+                    <span>Auto Score</span>
+                    <input id="scoreInput" type="number" min="0" max="100" readonly>
+                  </label>
+                  <label class="grow">
+                    <span>Priority Tier</span>
+                    <select id="priorityTierInput">
+                      <option value="">Unset</option>
+                      <option value="apply_now">Apply now</option>
+                      <option value="selective">Selective</option>
+                      <option value="skip">Skip</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  <span>Score / triage notes</span>
+                  <textarea id="scoreNotesInput" rows="3" placeholder="Why this score? Anything to remember about fit, risks, or angle."></textarea>
+                </label>
+                <div class="grid-3">
+                  <label>
+                    <span>Discovery</span>
+                    <select id="discoveryStatusInput"></select>
+                  </label>
+                  <label>
+                    <span>Application</span>
+                    <select id="applicationStatusInput"></select>
+                  </label>
+                  <label>
+                    <span>Interview</span>
+                    <select id="interviewStatusInput"></select>
+                  </label>
+                </div>
+                <div class="grid-2">
+                  <label>
+                    <span>Next action</span>
+                    <input id="nextActionInput" type="text" placeholder="Follow up with recruiter, draft outreach, customize resume bullets">
+                  </label>
+                  <label>
+                    <span>Due date</span>
+                    <input id="dueDateInput" type="date">
+                  </label>
+                </div>
+                <div class="actions left">
+                  <button id="saveTriageButton" type="button" class="primary-button">Save triage</button>
+                  <button id="savePipelineButton" type="button">Save next action</button>
+                </div>
+              </div>
+
+              <div class="activity-pane hidden" data-activity-pane="notes">
+                <form id="noteForm" class="inline-form">
+                  <input id="noteInput" type="text" placeholder="Add a note">
+                  <button type="submit">Add</button>
+                </form>
+                <div id="noteList" class="stack"></div>
+              </div>
+
+              <div class="activity-pane hidden" data-activity-pane="contacts">
+                <form id="contactForm" class="form-row">
+                  <input id="contactNameInput" type="text" placeholder="Name" class="grow">
+                  <select id="contactTypeInput">
+                    <option value="recruiter">Recruiter</option>
+                    <option value="hiring_manager">Hiring manager</option>
+                    <option value="referral">Referral</option>
+                  </select>
+                  <input id="contactEmailInput" type="email" placeholder="Email" class="grow">
+                  <button type="submit">Add contact</button>
+                </form>
+                <div id="contactList" class="stack"></div>
+              </div>
+
+              <div class="activity-pane hidden" data-activity-pane="events">
+                <form id="eventForm" class="form-row">
+                  <select id="eventTypeInput" class="grow">
+                    <option value="application_submitted">Application submitted</option>
+                    <option value="outreach_sent">Outreach sent</option>
+                    <option value="followup_sent">Follow-up sent</option>
+                    <option value="screen_scheduled">Screen scheduled</option>
+                    <option value="screen_done">Screen done</option>
+                    <option value="interview_scheduled">Interview scheduled</option>
+                    <option value="interview_done">Interview done</option>
+                    <option value="offer_received">Offer received</option>
+                  </select>
+                  <input id="eventDateInput" type="date">
+                  <input id="eventDetailsInput" type="text" placeholder="Details" class="grow">
+                  <button type="submit">Log event</button>
+                </form>
+                <div id="eventList" class="stack"></div>
+              </div>
+
+              <div class="activity-pane hidden" data-activity-pane="llm">
+                <p class="muted small">Drafts and analyses are editable. Nothing is saved automatically &mdash; use <strong>Apply to job</strong> to write results back.</p>
+                <div class="grid-4">
+                  <button id="generateFitScoreButton" type="button">AI match score</button>
+                  <button id="generateFitSummaryButton" type="button">Fit summary</button>
+                  <button id="generateOutreachButton" type="button">Outreach draft</button>
+                  <button id="generateInterviewPackButton" type="button">Interview pack</button>
+                </div>
+
+                <div id="fitAnalysisCard" class="ai-analysis hidden">
+                  <div class="meta">
+                    <span id="fitScorePill" class="pill"></span>
+                    <span id="fitTierPill" class="pill"></span>
+                  </div>
+                  <div id="fitAnalysisBody"></div>
+                  <div class="actions">
+                    <button id="applyFitAnalysisButton" type="button" class="primary-button">Apply to job</button>
+                  </div>
+                </div>
+
+                <div class="subsection">
+                  <h4>Summarize / extract a job description</h4>
+                  <p class="muted small">Paste the raw posting text. The AI returns a structured summary, keywords, and red flags you can apply to the selected job.</p>
+                  <label>
+                    <span>Job description</span>
+                    <textarea id="jdInput" rows="6" placeholder="Paste the full job posting text here..."></textarea>
+                  </label>
+                  <div class="actions">
+                    <button id="summarizeJdButton" type="button">Summarize / extract</button>
+                    <button id="clearJdButton" type="button" class="ghost-button">Clear</button>
+                  </div>
+                  <div id="jdResultCard" class="ai-analysis hidden">
+                    <div id="jdResultBody"></div>
+                    <div class="actions">
+                      <button id="applyJdButton" type="button" class="primary-button">Apply to job</button>
+                    </div>
+                  </div>
+                </div>
+
+                <label>
+                  <span>Generated output (editable)</span>
+                  <textarea id="llmOutput" rows="8"></textarea>
+                </label>
+                <p id="aiAssistStatus" class="muted small"></p>
+              </div>
+            </div>
+          </section>
+
+          <!-- =========== INSIGHTS =========== -->
+          <section class="panel section hidden" data-section="insights">
+            <div class="panel-head">
+              <h2>Insights</h2>
+              <button id="refreshMetricsButton" class="ghost-button" type="button">Refresh</button>
+            </div>
+            <p class="muted">Weekly funnel performance and source effectiveness.</p>
+            <div id="metricCards" class="grid-4"></div>
+
+            <div class="subsection">
+              <div class="panel-head">
+                <h3>Reminder queue</h3>
+                <button id="refreshRemindersButton" class="ghost-button" type="button">Refresh reminders</button>
+              </div>
+              <div id="reminderList" class="stack"></div>
+            </div>
+
+            <div class="subsection">
+              <div class="panel-head">
+                <h3>Source / channel effectiveness</h3>
+              </div>
+              <div id="sourcePerformanceList" class="stack"></div>
+            </div>
+
+            <div class="subsection">
+              <div class="panel-head">
+                <h3>Saved search performance</h3>
+              </div>
+              <div id="savedSearchPerformanceList" class="stack"></div>
+            </div>
+          </section>
+
+          <!-- =========== SETTINGS =========== -->
+          <section class="panel section hidden" data-section="settings">
+            <div class="panel-head">
+              <h2>Settings + Tools</h2>
+            </div>
+
+            <div class="subsection">
+              <h3>Search strategy</h3>
+              <p class="muted small">Used for guardrails, scoring hints, and the Lookup New Roles button.</p>
+              <div class="grid-3">
+                <label>
+                  <span>Preferred market</span>
+                  <input id="strategyMarketInput" type="text" placeholder="NYC metro">
+                </label>
+                <label>
+                  <span>Salary floor (USD)</span>
+                  <input id="strategySalaryFloorInput" type="number" min="0" step="1000" placeholder="180000">
+                </label>
+                <label>
+                  <span>Max travel (%)</span>
+                  <input id="strategyTravelInput" type="number" min="0" max="100" step="1" placeholder="20">
+                </label>
+              </div>
+              <label>
+                <span>Target role families (one per line)</span>
+                <textarea id="strategyTargetsInput" rows="4" placeholder="Applied AI Product&#10;Retail Product Systems"></textarea>
+              </label>
+              <label>
+                <span>Search keywords (comma separated)</span>
+                <textarea id="strategyKeywordsInput" rows="3" placeholder="applied AI, product strategy, merchandising systems"></textarea>
+              </label>
+              <div class="actions left">
+                <button id="saveStrategyButton" type="button" class="primary-button">Save strategy</button>
+              </div>
+              <p id="strategySummary" class="muted small"></p>
+            </div>
+
+            <div class="subsection">
+              <h3>LLM assist (optional)</h3>
+              <p class="muted small">All LLM actions are user-triggered. Key is stored encrypted in your local SQLite DB and never sent anywhere unless you click an Assist button.</p>
+              <label>
+                <span>Endpoint URL</span>
+                <input id="llmEndpointInput" type="url" placeholder="https://genai-sharedservice-americas.pwcinternal.com/v1/chat/completions">
+              </label>
+              <div class="grid-2">
+                <label>
+                  <span>Model</span>
+                  <input id="llmModelInput" type="text" placeholder="openai.gpt-4.1-mini">
+                </label>
+                <label>
+                  <span>API key</span>
+                  <input id="llmApiKeyInput" type="password" placeholder="sk-...">
+                </label>
+              </div>
+              <div class="actions left">
+                <button id="saveLlmSettingsButton" type="button" class="primary-button">Save LLM settings</button>
+              </div>
+            </div>
+
+            <div class="subsection">
+              <h3>Backup + restore (JSON snapshot)</h3>
+              <p class="muted small">Full snapshot of jobs, notes, contacts, events, saved views.</p>
+              <div class="backup-row">
+                <button id="exportButton" type="button">Export snapshot</button>
+                <label class="file-input">
+                  <span>Import snapshot</span>
+                  <input id="importInput" type="file" accept="application/json">
+                </label>
+              </div>
+            </div>
+
+            <div class="subsection">
+              <h3>Guardrails reference</h3>
+              <dl id="guardrails" class="facts"></dl>
+            </div>
+
+            <div class="subsection">
+              <div class="panel-head">
+                <h3>Target families</h3>
+                <span id="targetCount" class="pill subtle">0</span>
+              </div>
+              <div id="roleFamilies" class="stack"></div>
+            </div>
+          </section>
+
+        </section>
+      </main>
+    </div>
+
+    <!-- =========== ADD JOB MODAL =========== -->
+    <div id="addJobModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="addJobModalTitle">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-shell">
+        <div class="modal-head">
+          <h2 id="addJobModalTitle">Add a job</h2>
+          <button type="button" class="ghost-button" data-modal-close>Close</button>
+        </div>
+        <div class="modal-tabs">
+          <button class="modal-tab is-active" type="button" data-add-mode="manual">Manual</button>
+          <button class="modal-tab" type="button" data-add-mode="markdown">Markdown / CSV</button>
+          <button class="modal-tab" type="button" data-add-mode="lookup">Lookup roles</button>
+        </div>
+
+        <div class="modal-body">
+
+          <!-- Manual -->
+          <section class="add-mode" data-add-pane="manual">
+            <p class="muted small">Quickest path: fill the essentials, score will be auto-calculated.</p>
+            <form id="addJobForm" class="stack">
+              <div class="grid-3">
+                <label>
+                  <span>Source</span>
+                  <select id="newSource" aria-label="Role source">
+                    <option value="Manual">Manual</option>
+                    <option value="LinkedIn">LinkedIn</option>
+                    <option value="LinkedIn Alert">LinkedIn Alert</option>
+                    <option value="Referral">Referral</option>
+                    <option value="The Muse">The Muse</option>
+                    <option value="Deep Research">Deep Research</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Company</span>
+                  <input id="newCompany" type="text" placeholder="DoorDash" required>
+                </label>
+                <label>
+                  <span>Role title</span>
+                  <input id="newTitle" type="text" placeholder="Senior PM, DashMart" required>
+                </label>
+              </div>
+              <label>
+                <span>Role URL</span>
+                <input id="newRoleUrl" type="url" placeholder="https://...">
+              </label>
+              <div class="grid-3">
+                <label>
+                  <span>Location</span>
+                  <input id="newLocation" type="text" placeholder="NYC / Hybrid">
+                </label>
+                <label>
+                  <span>Salary label</span>
+                  <input id="newSalary" type="text" placeholder="180k - 220k">
+                </label>
+                <label>
+                  <span>Lane / family</span>
+                  <input id="newLane" type="text" placeholder="Retail systems">
+                </label>
+              </div>
+              <label>
+                <span>Summary and first notes</span>
+                <textarea id="newSummary" rows="4" placeholder="What the role is, why it might fit, anything unique."></textarea>
+              </label>
+              <div class="actions">
+                <button type="submit" class="primary-button">Add target job</button>
+              </div>
+            </form>
+          </section>
+
+          <!-- Markdown -->
+          <section class="add-mode hidden" data-add-pane="markdown">
+            <p class="muted small">Paste deep-research output or any markdown listing jobs (the LLM extracts them), or paste/upload a CSV with company &amp; title columns (parsed instantly, no LLM needed). You review before saving.</p>
+            <details class="research-prompt" id="researchPromptBlock">
+              <summary>Deep research prompt &mdash; copy &amp; run externally</summary>
+              <p class="muted small">Copy this into a deep-research tool (ChatGPT/Claude), run it, then paste the results below and parse.</p>
+              <label>
+                <span>Prompt</span>
+                <select id="researchPromptSelect"></select>
+              </label>
+              <textarea id="researchPromptText" rows="9" readonly placeholder="Loading prompt..."></textarea>
+              <div class="actions">
+                <button id="copyResearchPromptButton" type="button" class="primary-button">Copy prompt</button>
+              </div>
+              <p id="researchPromptStatus" class="muted small"></p>
+            </details>
+            <label>
+              <span>Or upload a .md or .csv file</span>
+              <input id="markdownFileInput" type="file" accept=".md,.csv,text/markdown,text/csv,text/plain">
+            </label>
+            <label>
+              <span>Markdown or CSV</span>
+              <textarea id="markdownTextarea" rows="10" placeholder="Markdown:&#10;## DoorDash - Senior PM, DashMart&#10;Location: NYC | URL: https://...&#10;&#10;Or CSV:&#10;company,title,location,url,salary,summary&#10;DoorDash,Senior PM,NYC,https://...,180k-220k,DashMart team"></textarea>
+            </label>
+            <div class="actions">
+              <button id="parseMarkdownButton" type="button" class="primary-button">Parse</button>
+              <button id="clearMarkdownButton" type="button" class="ghost-button">Clear</button>
+            </div>
+            <p id="markdownStatus" class="muted small"></p>
+            <div id="markdownPreview" class="stack"></div>
+            <div id="markdownPreviewActions" class="actions hidden">
+              <button id="addSelectedMarkdownButton" type="button" class="primary-button">Add selected jobs</button>
+            </div>
+          </section>
+
+          <!-- Lookup -->
+          <section class="add-mode hidden" data-add-pane="lookup">
+            <p class="muted small">Pulls public job postings from The Muse using your saved strategy.</p>
+            <div class="actions">
+              <button id="lookupJobsButton" type="button" class="primary-button">Lookup new roles</button>
+            </div>
+            <div id="lookupResults" class="stack"></div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- =========== HELP MODAL =========== -->
+    <div id="helpModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="helpModalTitle">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-shell">
+        <div class="modal-head">
+          <h2 id="helpModalTitle">How to use this app</h2>
+          <button type="button" class="ghost-button" data-modal-close>Close</button>
+        </div>
+        <div class="modal-body">
+          <ol class="start-here-steps">
+            <li><strong>Today</strong> tells you what to do next: overdue follow-ups, postings to re-verify, jobs awaiting scoring, due dates.</li>
+            <li><strong>Pipeline</strong> is the working list. Expand a job to score it, change status, add notes/contacts/events, and trigger LLM drafts.</li>
+            <li><strong>Insights</strong> shows weekly funnel performance and source effectiveness. Use it for retros.</li>
+            <li><strong>Settings</strong> is where you configure your search strategy, LLM key, JSON backup, and guardrails.</li>
+            <li>Click <strong>+ Add Job</strong> any time to paste markdown from deep research, add a job manually, or lookup new roles.</li>
+            <li>For each job, use <strong>Still live?</strong> to mark a posting as Live or Dead. Closed postings get de-emphasized; unverified ones get nudged on Today.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <script src="/app/app.js?v=20260601f"></script>
+  </body>
+</html>
