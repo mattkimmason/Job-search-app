@@ -1,0 +1,30 @@
+{
+  "name": "mcp-job-tracker",
+  "version": "0.1.1",
+  "private": true,
+  "description": "Read-only MCP server that wraps the local JSing job tracker REST API.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "main": "dist/server.js",
+  "bin": {
+    "mcp-job-tracker": "dist/server.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/server.js",
+    "inspect": "npx --yes @modelcontextprotocol/inspector node dist/server.js",
+    "test:smoke": "node scripts/smoke.mjs",
+    "test:smoke:fallback": "node scripts/smoke-fallback.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.6.0"
+  }
+}

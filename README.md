@@ -16,6 +16,7 @@ It is designed for one user running the app on their own machine. Job data lives
 - [Optional LLM Assist](#optional-llm-assist)
 - [API Reference](#api-reference)
 - [Troubleshooting](#troubleshooting)
+- [MCP Server (Optional)](#mcp-server-optional)
 - [Roadmap and Project Docs](#roadmap-and-project-docs)
 - [License](#license)
 
@@ -220,6 +221,12 @@ Get-ChildItem "C:\Users\<you>\nodejs" -Recurse | Unblock-File
 As a fallback, `node server.js` runs the app without the npm script shim.
 
 If `npm --prefix web install` fails with `UNABLE_TO_GET_ISSUER_CERT_LOCALLY` on a corporate network, `web/.npmrc` sets `strict-ssl=false` locally for the web project so dependency installs can work through TLS interception. The Node API itself only reaches the public npm registry during dependency installation.
+
+## MCP Server (Optional)
+
+`mcp-job-tracker/` is a separate, **read-only** [Model Context Protocol](https://modelcontextprotocol.io) server (TypeScript, stdio) that exposes this app's REST API as safe agent tools for MCP clients like Claude Desktop and Cursor. It never touches the SQLite database directly — it only calls the running app over HTTP — and it exposes five bounded, Zod-validated tools (`job_tracker_list_jobs`, `job_tracker_get_job`, `job_tracker_search_jobs`, `job_tracker_get_reminders`, `job_tracker_get_interview_pack`) plus a `prepare_for_interview` prompt. Every tool is annotated read-only, idempotent, and closed-world; results are bounded and passed through a secret-redaction allow-list.
+
+Requires the app to be running (`npm start`). See [`mcp-job-tracker/README.md`](mcp-job-tracker/README.md) for install/build/run steps and the MCP client config, and [`Docs/MCP-Job-Tracker-Showcase.md`](Docs/MCP-Job-Tracker-Showcase.md) for a write-up of the design decisions. Automated tests live under `mcp-job-tracker/scripts/` (`npm run test:smoke` / `npm run test:smoke:fallback`).
 
 ## Roadmap and Project Docs
 
